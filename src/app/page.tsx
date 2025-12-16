@@ -137,7 +137,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#f7f7f7]">
+    <div className="min-h-screen" style={{ fontFamily: "var(--font-playfair)", backgroundColor: "var(--background)", color: "var(--foreground)" }}>
       <BrandHeader />
 
       {showOnboarding && (
@@ -149,7 +149,7 @@ export default function Home() {
       <main className="mx-auto max-w-3xl px-6 pb-32">
         <section className="py-10">
           <h1
-            className="text-center text-3xl sm:text-4xl text-black"
+            className="text-center text-3xl sm:text-4xl text-[var(--foreground)]"
             style={{ fontFamily: "var(--font-playfair)" }}
           >
             Ask your Madison Book Library Chatbot
@@ -203,6 +203,14 @@ export default function Home() {
                           onOpenFeedback={() => setShowFeedbackModal(true)}
                           showFeedbackPrompt={showFeedbackPrompt}
                           onPromptHandled={() => setLastFeedbackShownCount(assistantCount)}
+                          onReask={(text: string) => {
+                            setInput(text);
+                            // try to focus the chat input inside ChatBar
+                            setTimeout(() => {
+                              const el = document.querySelector('#chat-input') as HTMLInputElement | null;
+                              el?.focus();
+                            }, 50);
+                          }}
                         />
 
                         {m.role === "assistant" && m.context && m.context.length > 0 && (

@@ -59,41 +59,36 @@ export function Onboarding({ onComplete }: OnboardingProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center bg-black/40 p-6 pt-16">
-      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-sm overflow-hidden border border-zinc-200">
+      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-sm overflow-hidden border" style={{ borderColor: "var(--border)" }}>
       {/* Stepper */}
         <div className="border-b bg-white/60">
           <div className="w-full px-6 py-4">
             <div className="flex items-center justify-between">
               {[1, 2].map((step) => (
-                <div key={step} className="flex items-center flex-1">
-                  <div className="flex items-center">
-                    <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm transition-colors ${
-                        step === currentStep
-                          ? "bg-blue-600 text-white"
-                          : step < currentStep
-                          ? "bg-green-600 text-white"
-                          : "bg-gray-200 text-gray-600"
-                      }`}
-                    >
-                      {step}
+                <div key={step} className="flex flex-col items-center flex-1">
+                  {/* Circle + Label */}
+                  <div className="flex flex-col items-center">
+                    <div style={{ width: 32, height: 32, borderRadius: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, transition: 'background-color 0.2s' }}>
+                      <div style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 9999,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: step === currentStep ? 'var(--accent)' : step < currentStep ? 'var(--accent-strong)' : 'var(--muted-bg)',
+                        color: step === currentStep || step < currentStep ? 'var(--foreground)' : 'var(--muted)'
+                      }}>{step}</div>
                     </div>
-                    <span
-                      className={`ml-3 text-sm ${
-                        step === currentStep
-                          ? "text-gray-900"
-                          : "text-gray-500"
-                      }`}
-                    >
+
+                    <span className={`mt-2 text-sm`} style={{ color: step === currentStep ? 'var(--foreground)' : 'var(--muted)' }}>
                       {step === 1 ? "Consent" : "About You"}
                     </span>
                   </div>
+
+                  {/* Connecting line */}
                   {step < totalSteps && (
-                    <div
-                      className={`flex-1 h-0.5 mx-4 ${
-                        step < currentStep ? "bg-green-600" : "bg-gray-200"
-                      }`}
-                    />
+                    <div style={{ flex: 1, height: 2, marginTop: 12, backgroundColor: step < currentStep ? 'var(--accent)' : 'var(--muted-bg)' }} />
                   )}
                 </div>
               ))}
@@ -101,28 +96,29 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           </div>
         </div>
 
+
         {/* Content */}
         <div className="w-full max-w-4xl">
             {currentStep === 1 && (
               <div className="bg-white p-8">
-                <h1 className="text-2xl text-gray-900 mb-6">
+                <h1 className="text-2xl mb-6" style={{ color: 'var(--foreground)' }}>
                   Welcome to the Madison Book Library Chatbot
                 </h1>
                 
                 <div className="space-y-4 mb-6">
-                  <p className="text-gray-700">
+                  <p style={{ color: 'var(--foreground)' }}>
                     I'm designed to help you quickly find books, articles, events, and other resources available through the Madison Library. I've learned from librarians, cataloging standards, and trusted information sources across the Madison Library system to give you accurate and helpful guidance.
                   </p>
                   
-                  <h2 className="text-lg text-gray-900 mt-6 mb-3">
-                    Disclaimer
-                  </h2>
-                  
-                  <p className="text-gray-700">
-                    Before proceeding, please read and acknowledge the following:
-                  </p>
-                  
-                  <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                    <h2 className="text-lg mt-6 mb-3" style={{ color: 'var(--foreground)' }}>
+                      Disclaimer
+                    </h2>
+
+                    <p style={{ color: 'var(--foreground)' }}>
+                      Before proceeding, please read and acknowledge the following:
+                    </p>
+
+                    <ul className="list-disc pl-6 space-y-2" style={{ color: 'var(--foreground)' }}>
                     <li>
                       This chat application is a helpful tool for discovering library materials, but it does not replace assistance from a professional librarian.
                     </li>
@@ -153,7 +149,8 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                   />
                   <label
                     htmlFor="consent"
-                    className="text-sm text-gray-900 cursor-pointer leading-relaxed"
+                    className="text-sm cursor-pointer leading-relaxed"
+                    style={{ color: 'var(--foreground)' }}
                   >
                     I Understand and Agree
                   </label>
@@ -162,8 +159,8 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                 <Button
                   onClick={handleConsentContinue}
                   disabled={!consentGiven}
-                  className={`w-full transition-colors ${consentGiven ? "bg-sky-600 text-white hover:bg-sky-700" : "bg-sky-300"}`}
                   size="lg"
+                  style={consentGiven ? { backgroundColor: 'var(--accent)', color: 'var(--foreground)', width: '100%' } : { backgroundColor: 'var(--accent)', opacity: 0.45, color: 'var(--foreground)', width: '100%' }}
                 >
                   Continue
                 </Button>
@@ -171,11 +168,11 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             )}
 
             {currentStep === 2 && (
-              <div className="bg-white rounded-lg border p-8">
-                <h1 className="text-2xl text-gray-900 mb-2">
+              <div className="bg-white rounded-lg border p-8" style={{ borderColor: 'var(--border)' }}>
+                <h1 className="text-2xl mb-2" style={{ color: 'var(--foreground)' }}>
                   Welcome to Madison Book Library
                 </h1>
-                <p className="text-gray-600 mb-8">
+                <p style={{ color: 'var(--foreground)', marginBottom: 32 }}>
                   Before you begin, we'd like to collect some basic demographic
                   information to better serve our community. This information is
                   anonymous and helps us understand our users.
@@ -183,7 +180,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
 
                 <div className="space-y-6 mb-8">
                   <div>
-                    <label className="text-sm text-gray-900 mb-2 block">
+                    <label className="text-sm mb-2 block" style={{ color: 'var(--foreground)' }}>
                       Occupation / Role
                     </label>
                     <Select value={occupation} onValueChange={setOccupation}>
@@ -202,7 +199,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                   </div>
 
                   <div>
-                    <label className="text-sm text-gray-900 mb-2 block">
+                    <label className="text-sm mb-2 block" style={{ color: 'var(--foreground)' }}>
                       Age Range
                     </label>
                     <Select value={ageRange} onValueChange={setAgeRange}>
@@ -222,14 +219,14 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                   </div>
                 </div>
 
-                    <Button
-                      onClick={handleDemographicContinue}
-                      disabled={!occupation || !ageRange}
-                      className={`w-full transition-colors ${occupation && ageRange ? "bg-sky-600 text-white hover:bg-sky-700" : "bg-sky-300"}`}
-                      size="lg"
-                    >
-                      Continue to Library
-                    </Button>
+                <Button
+                  onClick={handleDemographicContinue}
+                  disabled={!occupation || !ageRange}
+                  size="lg"
+                  style={occupation && ageRange ? { backgroundColor: 'var(--accent)', color: 'var(--foreground)', width: '100%' } : { backgroundColor: 'var(--accent)', opacity: 0.45, color: 'var(--foreground)', width: '100%' }}
+                >
+                  Continue to Library
+                </Button>
               </div>
             )}
           </div>

@@ -18,7 +18,7 @@ import { useState, useEffect } from "react";
  * - onPromptHandled: called after the user dismisses the prompt or
  *   opens the extended modal (so the page can mark the prompt handled)
  */
-import { Share2, Copy, RotateCw, MoreVertical, MessageSquare, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Share2, Copy, RotateCw, MessageSquare, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { toast } from "sonner";
@@ -35,9 +35,10 @@ interface ChatMessageProps {
   onOpenFeedback?: () => void;
   showFeedbackPrompt?: boolean;
   onPromptHandled?: () => void;
+  onReask?: (text: string) => void;
 }
 
-export function ChatMessage({ message, isLastAssistantMessage, onOpenFeedback, showFeedbackPrompt, onPromptHandled }: ChatMessageProps) {
+export function ChatMessage({ message, isLastAssistantMessage, onOpenFeedback, showFeedbackPrompt, onPromptHandled, onReask }: ChatMessageProps) {
   const [thumbsState, setThumbsState] = useState<"up" | "down" | null>(null);
   const [showPrompt, setShowPrompt] = useState<boolean>(() => (showFeedbackPrompt ?? false));
 
@@ -51,7 +52,20 @@ export function ChatMessage({ message, isLastAssistantMessage, onOpenFeedback, s
   };
 
   const handleShare = () => {
-    toast.success("Share link copied");
+    const shareText = message.content;
+    if (navigator.share) {
+      try {
+        navigator.share({ text: shareText }).catch(() => {});
+        toast.success("Opened share dialog");
+        return;
+      } catch (e) {}
+    }
+    // fallback: copy message text to clipboard as shareable content
+    navigator.clipboard.writeText(window.location.href + "\n\n" + shareText).then(() => {
+      toast.success("Share text copied to clipboard");
+    }).catch(() => {
+      toast.error("Unable to copy share text");
+    });
   };
 
   const handleThumbsUp = () => {
@@ -90,13 +104,25 @@ export function ChatMessage({ message, isLastAssistantMessage, onOpenFeedback, s
     }
   };
 
+  const handleReask = () => {
+    if (typeof onReask === "function") {
+      onReask(message.content);
+      toast.success("Message copied to input");
+    } else {
+      // fallback: copy to clipboard
+      navigator.clipboard.writeText(message.content).then(() => {
+        toast.success("Message copied to clipboard");
+      });
+    }
+  };
+
   // showPrompt controls whether the single-step feedback prompt is visible
 
   if (message.role === "user") {
     return (
       <div className="flex gap-4 justify-end">
-        <div className="bg-gray-100 rounded-2xl px-4 py-3 max-w-[80%]">
-          <p className="text-gray-900">{message.content}</p>
+        <div className="rounded-2xl px-4 py-3 max-w-[80%]" style={{ backgroundColor: "var(--accent)" }}>
+          <p style={{ fontFamily: "var(--font-playfair)", color: "var(--foreground)" }}>{message.content}</p>
         </div>
       </div>
     );
@@ -105,87 +131,83 @@ export function ChatMessage({ message, isLastAssistantMessage, onOpenFeedback, s
   return (
     <div className="flex gap-4">
       <Avatar className="w-8 h-8 mt-1 flex-shrink-0">
-        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+        <AvatarFallback className="bg-gradient-to-br from-amber-600 to-rose-700 text-white">
           M
         </AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">
         <div className="prose prose-sm max-w-none">
-          <p className="text-gray-900 whitespace-pre-wrap">{message.content}</p>
-        </div>
+            <p className="whitespace-pre-wrap" style={{ fontFamily: "var(--font-playfair)", color: "var(--foreground)" }}>{message.content}</p>
+          </div>
         
         {/* Action buttons */}
         <div className="flex items-center gap-1 mt-3">
           <Button
             variant="ghost"
             size="icon"
-            className={`h-8 w-8 ${
-              thumbsState === "up" 
-                ? "text-blue-600 bg-blue-50" 
-                : "text-gray-600"
-            }`}
+            className="h-8 w-8"
             onClick={handleThumbsUp}
+            style={ thumbsState === "up" ? { backgroundColor: "var(--accent)", color: "var(--foreground)" } : { color: "var(--foreground)" }}
           >
             <ThumbsUp className={`w-4 h-4 ${thumbsState === "up" ? "fill-current" : ""}`} />
           </Button>
+
           <Button
             variant="ghost"
             size="icon"
-            className={`h-8 w-8 ${
-              thumbsState === "down" 
-                ? "text-red-600 bg-red-50" 
-                : "text-gray-600"
-            }`}
+            className="h-8 w-8"
             onClick={handleThumbsDown}
+            style={ thumbsState === "down" ? { backgroundColor: "var(--accent)", color: "var(--foreground)" } : { color: "var(--foreground)" }}
           >
             <ThumbsDown className={`w-4 h-4 ${thumbsState === "down" ? "fill-current" : ""}`} />
           </Button>
+
           <div className="w-px h-5 bg-gray-300 mx-1" />
+
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-gray-600"
+            className="h-8 w-8"
             onClick={handleShare}
+            style={{ color: "var(--foreground)" }}
           >
             <Share2 className="w-4 h-4" />
           </Button>
+
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-gray-600"
+            className="h-8 w-8"
             onClick={handleCopy}
+            style={{ color: "var(--foreground)" }}
           >
             <Copy className="w-4 h-4" />
           </Button>
+
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-gray-600"
+            className="h-8 w-8"
+            onClick={handleReask}
+            style={{ color: "var(--foreground)" }}
           >
             <RotateCw className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-gray-600"
-          >
-            <MoreVertical className="w-4 h-4" />
           </Button>
         </div>
 
         {/* Feedback Notification - Only show for last assistant message */}
         {isLastAssistantMessage && onOpenFeedback && (showFeedbackPrompt ?? true) && showPrompt && (
           <div className="mt-4">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between">
+            <div className="rounded-lg p-4 flex items-center justify-between" style={{ backgroundColor: "var(--background)", border: "1px solid var(--border)" }}>
               <div className="flex items-center gap-3">
-                <MessageSquare className="w-5 h-5 text-blue-600" />
-                <p className="text-sm text-gray-700">Would you like to give some feedback to this conversation?</p>
+                  <MessageSquare className="w-5 h-5" style={{ color: "var(--foreground)" }} />
+                  <p className="text-sm" style={{ color: "var(--foreground)" }}>Would you like to give some feedback to this conversation?</p>
               </div>
               <div className="flex items-center gap-2">
                 <Button size="sm" variant="ghost" onClick={() => { setShowPrompt(false); onPromptHandled && onPromptHandled(); }}>
                   Dismiss
                 </Button>
-                <Button size="sm" onClick={() => { setShowPrompt(false); onOpenFeedback && onOpenFeedback(); onPromptHandled && onPromptHandled(); }} className="bg-blue-600 hover:bg-blue-700">
+                  <Button size="sm" onClick={() => { setShowPrompt(false); onOpenFeedback && onOpenFeedback(); onPromptHandled && onPromptHandled(); }} style={{ backgroundColor: "var(--accent)", color: "var(--foreground)" }}>
                   Give Feedback
                 </Button>
               </div>

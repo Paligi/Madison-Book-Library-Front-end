@@ -12,13 +12,14 @@ interface FeedbackModalProps {
 
 export function FeedbackModal({ isOpen, onClose, conversation }: FeedbackModalProps) {
   const [helpfulnessRating, setHelpfulnessRating] = useState(0);
-  const [accuracyRating, setAccuracyRating] = useState(0);
   const [hoveredHelpfulStar, setHoveredHelpfulStar] = useState(0);
-  const [hoveredAccuracyStar, setHoveredAccuracyStar] = useState(0);
+  // Rating for whether the answer successfully cited library documents
+  const [citationRating, setCitationRating] = useState(0);
+  const [hoveredCitationStar, setHoveredCitationStar] = useState(0);
   const [feedbackText, setFeedbackText] = useState("");
 
   const handleSubmit = () => {
-    if (helpfulnessRating === 0 && accuracyRating === 0 && !feedbackText.trim()) {
+    if (helpfulnessRating === 0 && citationRating === 0 && !feedbackText.trim()) {
       toast.error("Please provide at least one rating or feedback");
       return;
     }
@@ -31,7 +32,7 @@ export function FeedbackModal({ isOpen, onClose, conversation }: FeedbackModalPr
         body: JSON.stringify({
           type: "extended",
           helpfulnessRating,
-          accuracyRating,
+          citationRating,
           feedbackText,
           conversation: conversation || [],
         }),
@@ -44,9 +45,9 @@ export function FeedbackModal({ isOpen, onClose, conversation }: FeedbackModalPr
 
   const handleClose = () => {
     setHelpfulnessRating(0);
-    setAccuracyRating(0);
     setHoveredHelpfulStar(0);
-    setHoveredAccuracyStar(0);
+    setCitationRating(0);
+    setHoveredCitationStar(0);
     setFeedbackText("");
     onClose();
   };
@@ -70,13 +71,7 @@ export function FeedbackModal({ isOpen, onClose, conversation }: FeedbackModalPr
               className="transition-transform hover:scale-110"
               aria-label={`Rate ${star} stars`}
             >
-              <Star
-                className={`w-6 h-6 transition-colors ${
-                  isFilled
-                    ? "fill-yellow-400 text-yellow-400"
-                    : "fill-none text-gray-300"
-                }`}
-              />
+              <Star className="w-6 h-6 transition-colors" style={{ color: isFilled ? "var(--accent-strong)" : "#d1d5db", fill: isFilled ? "var(--accent)" : "#d1d5db" }} />
             </button>
           );
         })}
@@ -99,10 +94,11 @@ export function FeedbackModal({ isOpen, onClose, conversation }: FeedbackModalPr
         <div className="bg-white rounded-lg shadow-xl p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl text-gray-900">Provide Feedback</h2>
+            <h2 className="text-xl" style={{ color: "var(--foreground)" }}>Provide Feedback</h2>
             <button
               onClick={handleClose}
-              className="text-gray-500 hover:text-gray-700 transition-colors"
+              className="transition-colors"
+              style={{ color: "var(--foreground)" }}
               aria-label="Close"
             >
               <X className="w-5 h-5" />
@@ -113,31 +109,31 @@ export function FeedbackModal({ isOpen, onClose, conversation }: FeedbackModalPr
           <div className="space-y-6">
             {/* Helpfulness Rating */}
             <div>
-              <p className="text-sm text-gray-700 mb-3">
-                How's the conversation going?
-              </p>
-              {renderStars(
-                helpfulnessRating,
-                hoveredHelpfulStar,
-                setHelpfulnessRating,
-                setHoveredHelpfulStar
-              )}
+                <p className="text-sm mb-3" style={{ color: "var(--foreground)" }}>How helpful was this conversation?</p>
+                {renderStars(
+                  helpfulnessRating,
+                  hoveredHelpfulStar,
+                  setHelpfulnessRating,
+                  setHoveredHelpfulStar
+                )}
             </div>
 
-            {/* Accuracy Rating */}
-            <div>
-              <p className="text-sm text-gray-700 mb-3">How helpful is this conversation?</p>
-              {renderStars(
-                accuracyRating,
-                hoveredAccuracyStar,
-                setAccuracyRating,
-                setHoveredAccuracyStar
-              )}
-            </div>
+              {/* Citation Question */}
+              <div>
+                <p className="text-sm mb-3" style={{ color: "var(--foreground)" }}>
+                  Did the answer successfully cite documents from Madison's library?
+                </p>
+                {renderStars(
+                  citationRating,
+                  hoveredCitationStar,
+                  setCitationRating,
+                  setHoveredCitationStar
+                )}
+              </div>
 
             {/* Feedback Input */}
             <div>
-              <label htmlFor="feedback" className="text-sm text-gray-700 mb-2 block">
+              <label htmlFor="feedback" className="text-sm mb-2 block" style={{ color: "var(--foreground)" }}>
                 Additional feedback (optional)
               </label>
               <Textarea
@@ -152,10 +148,16 @@ export function FeedbackModal({ isOpen, onClose, conversation }: FeedbackModalPr
 
           {/* Actions */}
           <div className="flex justify-end gap-3 mt-6">
-            <Button variant="outline" onClick={handleClose}>
+            <Button variant="outline" onClick={handleClose} style={{ color: "var(--foreground)", borderColor: "var(--accent)" }}>
               Cancel
             </Button>
-            <Button onClick={handleSubmit}>Submit Feedback</Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={helpfulnessRating === 0 && citationRating === 0 && !feedbackText.trim()}
+              style={helpfulnessRating === 0 && citationRating === 0 && !feedbackText.trim() ? { backgroundColor: "var(--accent)", opacity: 0.45, color: "var(--foreground)" } : { backgroundColor: "var(--accent)", color: "var(--foreground)" }}
+            >
+              Submit Feedback
+            </Button>
           </div>
         </div>
       </div>
